@@ -4,6 +4,11 @@
 
 # Oklahoma Gas & Electric for Home Assistant
 
+![Electricity usage example](images/example-001.png)
+
+> [!WARNING]
+> This is a personal project I built for myself, and I may or may not maintain it going forward. You are welcome to fork it and make your own changes, and you can submit PRs if needed, but I may decide not to maintain it for others.
+
 Custom Home Assistant integration for Oklahoma Gas & Electric (OGE).
 
 This integration signs into the OGE customer portal, discovers your available electric accounts, and imports hourly usage and hourly cost data into Home Assistant. It is designed to behave like a native utility integration instead of exposing a pile of daily-reset helper sensors.
