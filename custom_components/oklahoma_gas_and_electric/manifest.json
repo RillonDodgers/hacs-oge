@@ -1,0 +1,17 @@
+{
+  "domain": "oklahoma_gas_and_electric",
+  "name": "Oklahoma Gas & Electric",
+  "version": "0.1.0",
+  "codeowners": [
+    "@RillonDodgers"
+  ],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://www.home-assistant.io/integrations/oklahoma_gas_and_electric",
+  "homekit": {},
+  "integration_type": "service",
+  "iot_class": "cloud_polling",
+  "requirements": [],
+  "ssdp": [],
+  "zeroconf": []
+}

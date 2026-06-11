@@ -1,0 +1,61 @@
+{
+    "config": {
+        "abort": {
+            "already_configured": "Account is already configured"
+        },
+        "error": {
+            "cannot_connect": "Failed to connect",
+            "invalid_auth": "Invalid authentication",
+            "unknown": "Unexpected error"
+        },
+        "step": {
+            "reauth_confirm": {
+                "data": {
+                    "password": "Password",
+                    "username": "Username"
+                }
+            },
+            "select_account": {
+                "data": {
+                    "account_number": "Account"
+                }
+            },
+            "user": {
+                "data": {
+                    "password": "Password",
+                    "username": "Username"
+                }
+            }
+        }
+    },
+    "entity": {
+        "sensor": {
+            "account_number": {
+                "name": "Account number"
+            },
+            "estimated_bill": {
+                "name": "Estimated bill"
+            },
+            "latest_hour_peak_demand": {
+                "name": "Latest hour peak demand"
+            },
+            "price_per_kwh": {
+                "name": "Price per kWh"
+            },
+            "service_address": {
+                "name": "Service address"
+            }
+        }
+    },
+    "options": {
+        "step": {
+            "init": {
+                "data": {
+                    "correction_days": "Correction window days",
+                    "history_days": "Initial history days"
+                },
+                "title": "History settings"
+            }
+        }
+    }
+}
