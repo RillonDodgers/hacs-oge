@@ -1,0 +1,8 @@
+refresh:
+  name: Refresh data
+  description: Force an immediate OGE data refresh using stored credentials.
+  fields:
+    account_number:
+      name: Account number
+      description: Refresh only the matching configured OGE account. Omit to refresh all configured OGE entries.
+      example: "1234567890"
