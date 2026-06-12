@@ -166,6 +166,21 @@ Primary runtime files:
 - Prefer small, first-party-feeling Home Assistant patterns over custom persistence or workarounds.
 - If changing auth behavior, recorder-stat import behavior, or dashboard compatibility, preserve the architectural intent described above.
 
+## Workflow for new requests
+
+For each new problem or change request in this repository:
+
+1. If the user already provides an issue number or says they created an issue, use that issue.
+2. Otherwise, create a GitHub issue in this repository with `gh` before making code changes.
+3. Write issue bodies using three C's:
+   - `Card`: short statement of requested work
+   - `Conversation`: context, constraints, and approach
+   - `Confirmation`: concrete acceptance criteria
+4. Create and use a branch named `feat/<issue_number>` for the work.
+5. Use conventional commit messages such as `feat: short commit message`.
+
+This issue-first workflow is default unless the user explicitly says an issue already exists.
+
 ## If future work expands
 
 Reasonable future additions:
