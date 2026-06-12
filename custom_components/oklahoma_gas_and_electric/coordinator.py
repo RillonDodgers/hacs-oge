@@ -1,7 +1,8 @@
 """Data coordinator for Oklahoma Gas & Electric."""
 
+import asyncio
 from dataclasses import dataclass
-from datetime import timedelta
+from datetime import date, timedelta
 from decimal import Decimal
 import logging
 from typing import Any
@@ -79,6 +80,7 @@ class OgeDataUpdateCoordinator(DataUpdateCoordinator[OgeData]):
         self.api = api
         self.account = account
         self._statistics = OgeStatisticsManager(hass, account)
+        self._manual_refresh_lock = asyncio.Lock()
 
     async def _async_update_data(self) -> OgeData:
         """Fetch data from OGE."""
@@ -92,6 +94,44 @@ class OgeDataUpdateCoordinator(DataUpdateCoordinator[OgeData]):
         has_imported_statistics = await self._statistics.async_has_statistics()
         lookback_days = history_days if not has_imported_statistics else correction_days
         from_date = to_date - timedelta(days=lookback_days - 1)
+        _LOGGER.debug(
+            "Scheduled OGE refresh for %s using %s window: %s..%s",
+            self.account.account_number,
+            "initial history" if not has_imported_statistics else "correction",
+            from_date,
+            to_date,
+        )
+        return await self._async_fetch_window(from_date, to_date)
+
+    async def async_refresh_for_window(
+        self,
+        from_date: date,
+        to_date: date,
+    ) -> None:
+        """Refresh coordinator using an explicit date window."""
+        async with self._manual_refresh_lock:
+            async with self._debounced_refresh.async_lock():
+                _LOGGER.debug(
+                    "Manual OGE refresh for %s using explicit window %s..%s",
+                    self.account.account_number,
+                    from_date,
+                    to_date,
+                )
+                data = await self._async_fetch_window(from_date, to_date)
+                self.async_set_updated_data(data)
+
+    async def _async_fetch_window(
+        self,
+        from_date: date,
+        to_date: date,
+    ) -> OgeData:
+        """Fetch and import data for a specific date window."""
+        _LOGGER.debug(
+            "Fetching OGE data for %s from %s to %s",
+            self.account.account_number,
+            from_date,
+            to_date,
+        )
         try:
             await self.api.async_prepare_authenticated_session()
             snapshot: OgeAccountSnapshot = await self.api.async_get_account_snapshot(
@@ -109,6 +149,12 @@ class OgeDataUpdateCoordinator(DataUpdateCoordinator[OgeData]):
         self.account = snapshot.account
         self._statistics.account = snapshot.account
         await self._statistics.async_import_usage(snapshot.usage_days)
+        _LOGGER.debug(
+            "Fetched OGE data for %s: %s day%s imported",
+            snapshot.account.account_number,
+            len(snapshot.usage_days),
+            "" if len(snapshot.usage_days) == 1 else "s",
+        )
         return OgeData(
             account=snapshot.account,
             estimated_bill=snapshot.estimated_bill,

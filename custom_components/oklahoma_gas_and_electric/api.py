@@ -184,6 +184,7 @@ class OgeClient:
 
     async def async_prepare_authenticated_session(self) -> None:
         """Start a fresh authenticated portal session."""
+        _LOGGER.debug("Refreshing OGE portal session")
         self._clear_session_cookie()
         await self.async_login()
 
@@ -270,6 +271,11 @@ class OgeClient:
         """Request and decode JSON from the OGE API."""
         for attempt in range(2):
             if not self._has_session_cookie():
+                _LOGGER.debug(
+                    "No OGE session cookie before %s %s; logging in",
+                    method,
+                    path,
+                )
                 await self.async_login()
 
             try:
@@ -281,6 +287,13 @@ class OgeClient:
                     allow_redirects=True,
                 ) as response:
                     if response.status in (401, 403):
+                        _LOGGER.debug(
+                            "OGE rejected session for %s %s with status %s on attempt %s",
+                            method,
+                            path,
+                            response.status,
+                            attempt + 1,
+                        )
                         self._clear_session_cookie()
                         if attempt == 0:
                             continue
@@ -294,6 +307,13 @@ class OgeClient:
                         payload = json.loads(await response.text())
             except ClientResponseError as err:
                 if err.status in (401, 403):
+                    _LOGGER.debug(
+                        "OGE request %s %s hit auth status %s on attempt %s",
+                        method,
+                        path,
+                        err.status,
+                        attempt + 1,
+                    )
                     self._clear_session_cookie()
                     if attempt == 0:
                         continue
@@ -313,6 +333,7 @@ class OgeClient:
 
     async def async_login(self) -> None:
         """Authenticate against the OGE portal and store the session cookie."""
+        _LOGGER.debug("Starting OGE portal login flow")
         try:
             async with self._session.get(
                 f"{BASE_URL}{PORTAL_PATH}",
@@ -356,6 +377,7 @@ class OgeClient:
 
         if not self._has_session_cookie():
             raise OgeAuthenticationError("OGE login did not create a session")
+        _LOGGER.debug("OGE portal login flow complete; session cookie acquired")
 
     def _has_session_cookie(self) -> bool:
         """Return whether the OGE session cookie is available."""
@@ -364,6 +386,7 @@ class OgeClient:
 
     def _clear_session_cookie(self) -> None:
         """Clear the OGE session cookie jar."""
+        _LOGGER.debug("Clearing OGE session cookies")
         self._session.cookie_jar.clear()
 
 
