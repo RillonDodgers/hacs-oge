@@ -172,14 +172,40 @@ For each new problem or change request in this repository:
 
 1. If the user already provides an issue number or says they created an issue, use that issue.
 2. Otherwise, create a GitHub issue in this repository with `gh` before making code changes.
-3. Write issue bodies using three C's:
+3. When creating a new issue with `gh`, assign it to the authenticated `gh` user creating it.
+4. Write issue bodies using three C's:
    - `Card`: short statement of requested work
    - `Conversation`: context, constraints, and approach
    - `Confirmation`: concrete acceptance criteria
-4. Create and use a branch named `feat/<issue_number>` for the work.
-5. Use conventional commit messages such as `feat: short commit message`.
+5. Create and use a branch named `feat/<issue_number>` for the work.
+6. Use conventional commit messages such as `feat: short commit message`.
 
 This issue-first workflow is default unless the user explicitly says an issue already exists.
+
+## Workflow for stage, push, review, merge
+
+If the user says `stage`, `push`, `review`, or `merge`, those may be handled separately or together.
+
+If the user says `stage, push, review, merge`, interpret that as:
+
+1. add tracked and untracked files to git
+2. create a conventional commit
+3. push branch with git
+4. use `gh` for PR workflow so actions come from the authenticated GitHub user tied to the issue
+5. review PR or diff
+6. merge PR
+
+Preferred all-at-once trigger phrase:
+
+- `stage, push, review, merge`
+
+When review is requested, use `caveman-review` if that skill is present.
+
+## Skill defaults
+
+If `caveman` skill is present, enable it at start of every session.
+
+If review is requested and `caveman-review` skill is present, use it for review output.
 
 ## If future work expands
 
