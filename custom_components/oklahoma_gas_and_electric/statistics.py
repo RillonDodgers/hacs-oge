@@ -115,7 +115,7 @@ class OgeStatisticsManager:
         return StatisticMetaData(
             has_sum=True,
             mean_type=StatisticMeanType.NONE,
-            name=f"OGE energy import {self.account.account_number}",
+            name=f"{_display_account_name(self.account.account_number)} energy import",
             source=DOMAIN,
             statistic_id=self.energy_statistic_id,
             unit_class=EnergyConverter.UNIT_CLASS,
@@ -128,7 +128,7 @@ class OgeStatisticsManager:
         return StatisticMetaData(
             has_sum=True,
             mean_type=StatisticMeanType.NONE,
-            name=f"OGE energy cost {self.account.account_number}",
+            name=f"{_display_account_name(self.account.account_number)} energy cost",
             source=DOMAIN,
             statistic_id=self.cost_statistic_id,
             unit_class=None,
@@ -137,43 +137,31 @@ class OgeStatisticsManager:
 
     async def _async_get_sum_before(self, statistic_id: str, start: datetime) -> float:
         """Return the last cumulative sum before the given start."""
-        stats = await get_instance(self.hass).async_add_executor_job(
-            statistics_during_period,
-            self.hass,
-            start - timedelta(days=3660),
-            start,
-            {statistic_id},
-            "hour",
-            None,
-            {"sum"},
-        )
-        records = stats.get(statistic_id, [])
-        if not records:
-            return 0.0
+        for lookback_days in (7, 31, 180, 3660):
+            stats = await get_instance(self.hass).async_add_executor_job(
+                statistics_during_period,
+                self.hass,
+                start - timedelta(days=lookback_days),
+                start,
+                {statistic_id},
+                "hour",
+                None,
+                {"sum"},
+            )
+            records = stats.get(statistic_id, [])
+            if not records:
+                continue
 
-        start_timestamp = start.timestamp()
-        base_sum = 0.0
-        for record in records:
-            record_start = record["start"]
-            if record_start >= start_timestamp:
-                break
-            base_sum = float(record.get("sum") or 0.0)
-        return base_sum
+            start_timestamp = start.timestamp()
+            base_sum = 0.0
+            for record in records:
+                record_start = record["start"]
+                if record_start >= start_timestamp:
+                    break
+                base_sum = float(record.get("sum") or 0.0)
+            return base_sum
 
-
-def calculate_price_per_kwh(usage_days: tuple[OgeUsageDay, ...]) -> Decimal | None:
-    """Return the blended price per kWh for the imported window."""
-    total_cost = Decimal("0")
-    total_kwh = Decimal("0")
-    for imported_hour in _build_imported_hours(None, usage_days):
-        if imported_hour.kwh <= 0:
-            continue
-        total_cost += imported_hour.cost
-        total_kwh += imported_hour.kwh
-
-    if total_kwh <= 0:
-        return None
-    return total_cost / total_kwh
+        return 0.0
 
 
 def _build_imported_hours(
@@ -229,3 +217,10 @@ def _hour_start(
 def _hour_sort_key(usage_hour: OgeUsageHour) -> int:
     """Return a sortable integer for an OGE hour label."""
     return int(usage_hour.hour.split(":", 1)[0])
+
+
+def _display_account_name(account_number: str) -> str:
+    """Return standard user-facing account label."""
+    digits = "".join(char for char in account_number if char.isdigit())
+    suffix = digits[-4:] if len(digits) >= 4 else account_number[-4:]
+    return f"OGE XXXX{suffix}"

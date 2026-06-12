@@ -52,10 +52,20 @@ STEP_USER_DATA_SCHEMA = vol.Schema(
 
 
 def _account_title(account: OgeAccount) -> str:
-    """Return a friendly account title."""
-    if account.service_address and account.service_address != account.account_number:
-        return account.service_address
-    return account.account_number
+    """Return a privacy-preserving account title."""
+    return _display_account_name(account.account_number)
+
+
+def _mask_account_number(account_number: str) -> str:
+    """Return a masked account number suitable for UI labels."""
+    digits = "".join(char for char in account_number if char.isdigit())
+    suffix = digits[-4:] if len(digits) >= 4 else account_number[-4:]
+    return f"XXXX{suffix}"
+
+
+def _display_account_name(account_number: str) -> str:
+    """Return standard user-facing account label."""
+    return f"OGE {_mask_account_number(account_number)}"
 
 
 class ConfigFlow(ConfigFlowBase, domain=DOMAIN):
@@ -103,7 +113,8 @@ class ConfigFlow(ConfigFlowBase, domain=DOMAIN):
             except OgeConnectionError:
                 errors["base"] = "cannot_connect"
             except OgeClientError:
-                errors["base"] = "invalid_auth"
+                _LOGGER.warning("OGE reauth failed due to unexpected response")
+                errors["base"] = "unknown"
             except Exception:
                 _LOGGER.exception("Unexpected exception during OGE reauth flow")
                 errors["base"] = "unknown"
@@ -119,7 +130,6 @@ class ConfigFlow(ConfigFlowBase, domain=DOMAIN):
                 STEP_USER_DATA_SCHEMA,
                 {
                     CONF_USERNAME: reauth_entry.data[CONF_USERNAME],
-                    CONF_PASSWORD: reauth_entry.data[CONF_PASSWORD],
                 },
             ),
             errors=errors,
@@ -147,7 +157,8 @@ class ConfigFlow(ConfigFlowBase, domain=DOMAIN):
             except OgeConnectionError:
                 errors["base"] = "cannot_connect"
             except OgeClientError:
-                errors["base"] = "invalid_auth"
+                _LOGGER.warning("OGE config flow failed due to unexpected response")
+                errors["base"] = "unknown"
             except Exception:
                 _LOGGER.exception("Unexpected exception during OGE config flow")
                 errors["base"] = "unknown"
@@ -188,11 +199,8 @@ class ConfigFlow(ConfigFlowBase, domain=DOMAIN):
                             options=[
                                 selector.SelectOptionDict(
                                     value=account.account_number,
-                                    label=(
-                                        f"{account.account_number} - {account.service_address}"
-                                        if account.service_address
-                                        != account.account_number
-                                        else account.account_number
+                                    label=_display_account_name(
+                                        account.account_number
                                     ),
                                 )
                                 for account in self._accounts

@@ -39,9 +39,6 @@
             "latest_hour_peak_demand": {
                 "name": "Latest hour peak demand"
             },
-            "price_per_kwh": {
-                "name": "Price per kWh"
-            },
             "service_address": {
                 "name": "Service address"
             }

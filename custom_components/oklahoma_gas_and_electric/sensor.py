@@ -6,7 +6,6 @@ from decimal import Decimal
 
 from homeassistant.components.sensor import (
     EntityCategory,
-    SensorStateClass,
     SensorDeviceClass,
     SensorEntity,
     SensorEntityDescription,
@@ -19,7 +18,6 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import CONF_ACCOUNT_NUMBER, DOMAIN
 from .coordinator import OgeConfigEntry, OgeData, OgeDataUpdateCoordinator
-from .statistics import calculate_price_per_kwh
 
 PARALLEL_UPDATES = 0
 
@@ -39,14 +37,6 @@ ENTITY_DESCRIPTIONS: tuple[OgeSensorEntityDescription, ...] = (
         native_unit_of_measurement="USD",
         suggested_display_precision=2,
         value_fn=lambda data: data.estimated_bill,
-    ),
-    OgeSensorEntityDescription(
-        key="price_per_kwh",
-        translation_key="price_per_kwh",
-        native_unit_of_measurement="USD/kWh",
-        suggested_display_precision=4,
-        state_class=SensorStateClass.MEASUREMENT,
-        value_fn=lambda data: calculate_price_per_kwh(data.usage_days),
     ),
     OgeSensorEntityDescription(
         key="latest_hour_peak_demand",
@@ -115,13 +105,27 @@ class OgeSensor(CoordinatorEntity[OgeDataUpdateCoordinator], SensorEntity):
         return DeviceInfo(
             identifiers={(DOMAIN, account.account_number)},
             manufacturer="Oklahoma Gas & Electric",
-            name=account.service_address,
+            name=_display_account_name(account.account_number),
         )
 
     @property
     def native_value(self) -> Decimal | str | None:
         """Return the sensor value."""
         return self.entity_description.value_fn(self.coordinator.data)
+
+
+def _mask_account_number(account_number: str) -> str:
+    """Return a masked account number suitable for UI labels."""
+    digits = "".join(char for char in account_number if char.isdigit())
+    suffix = digits[-4:] if len(digits) >= 4 else account_number[-4:]
+    return f"XXXX{suffix}"
+
+
+def _display_account_name(account_number: str) -> str:
+    """Return standard user-facing account label."""
+    return f"OGE {_mask_account_number(account_number)}"
+
+
 def _latest_populated_hour(data: OgeData):
     """Return the latest populated hour in the most recent day."""
     if not data.usage_days:
