@@ -58,3 +58,4 @@ After setup, the integration supports options for:
 
 - This integration currently targets electric usage data available from the OGE portal.
 - Energy Dashboard should use the imported OGE statistics, not a daily-reset sensor.
+- Release and changelog workflow details live in [RELEASING.md](/Users/dir/workflow/hacs-oge/RELEASING.md).

@@ -1,7 +1,7 @@
 {
   "domain": "oklahoma_gas_and_electric",
   "name": "Oklahoma Gas & Electric",
-  "version": "0.1.0",
+  "version": "0.2.0b0",
   "codeowners": [
     "@RillonDodgers"
   ],
