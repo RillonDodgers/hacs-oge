@@ -6,3 +6,15 @@ refresh:
       name: Account number
       description: Refresh only the matching configured OGE account. Omit to refresh all configured OGE entries.
       example: "1234567890"
+    history_days:
+      name: History days
+      description: Override the normal refresh window and import this many days ending today.
+      example: 365
+    from_date:
+      name: From date
+      description: Override the normal refresh window start date in YYYY-MM-DD format. Use together with to_date.
+      example: "2025-06-01"
+    to_date:
+      name: To date
+      description: Override the normal refresh window end date in YYYY-MM-DD format. Use together with from_date.
+      example: "2026-06-12"
