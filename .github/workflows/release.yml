@@ -44,19 +44,22 @@ jobs:
 
           if [[ "${tag}" =~ b[0-9]+$ ]]; then
             prerelease=true
+            cliff_args="--latest --strip header --verbose"
           else
             prerelease=false
+            cliff_args="--latest --strip header --verbose --tag-pattern '^v[0-9]+\\.[0-9]+\\.[0-9]+$'"
           fi
 
           echo "tag=${tag}" >> "${GITHUB_OUTPUT}"
           echo "prerelease=${prerelease}" >> "${GITHUB_OUTPUT}"
+          echo "cliff_args=${cliff_args}" >> "${GITHUB_OUTPUT}"
 
       - name: Generate release notes
         id: git-cliff
         uses: orhun/git-cliff-action@v4
         with:
           config: cliff.toml
-          args: --latest --strip header --verbose
+          args: ${{ steps.meta.outputs.cliff_args }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
         env:
           OUTPUT: RELEASE_NOTES.md
