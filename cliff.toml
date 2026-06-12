@@ -21,13 +21,17 @@ trim = true
 
 [git]
 conventional_commits = true
-filter_unconventional = false
+filter_unconventional = true
 protect_breaking_commits = true
 split_commits = false
 tag_pattern = "v[0-9].*"
 sort_commits = "oldest"
 
 commit_parsers = [
+  { message = "^Merge pull request", skip = true },
+  { message = "^Initial commit$", skip = true },
+  { message = "^chore\\(release\\):", skip = true },
+  { message = "^chore: release ", skip = true },
   { body = ".*BREAKING CHANGE:.*", group = "Breaking Changes" },
   { message = "^feat", group = "Features" },
   { message = "^fix", group = "Fixes" },
@@ -39,7 +43,6 @@ commit_parsers = [
   { message = "^ci", group = "CI" },
   { message = "^revert", group = "Reverts" },
   { message = "^chore", group = "Chores" },
-  { message = ".*", group = "Changed" },
 ]
 
 [remote.github]

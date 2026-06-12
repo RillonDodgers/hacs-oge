@@ -51,7 +51,7 @@ Examples:
 ## Maintainer workflow
 
 1. Update `custom_components/oklahoma_gas_and_electric/manifest.json` to the next release version.
-2. Commit the version change using a conventional commit when possible.
+2. Commit the version change using `chore(release): vX.Y.Z`.
 3. Push the commit to the release branch.
 4. Create and push the release tag:
    - Stable: `git tag vX.Y.Z && git push origin vX.Y.Z`
