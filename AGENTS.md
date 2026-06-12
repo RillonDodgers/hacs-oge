@@ -170,18 +170,20 @@ Primary runtime files:
 
 For each new problem or change request in this repository:
 
-1. If the user already provides an issue number or says they created an issue, use that issue.
-2. Otherwise, create a GitHub issue in this repository with `gh` before making code changes.
-3. When creating a new issue with `gh`, assign it to the authenticated `gh` user creating it.
-4. Write issue bodies using three C's:
+1. If the current chat is already working on an open issue for this repository, continue using that same issue by default.
+2. For same-chat follow-up work on the same issue, update or append to the current issue instead of creating a new issue, unless the user explicitly asks to split the work into a separate issue.
+3. If the user already provides an issue number or says they created an issue, use that issue.
+4. Otherwise, create a GitHub issue in this repository with `gh` before making code changes.
+5. When creating a new issue with `gh`, assign it to the authenticated `gh` user creating it.
+6. Write issue bodies using three C's:
    - `Card`: short statement of requested work
    - `Conversation`: context, constraints, and approach
    - `Confirmation`: concrete acceptance criteria
-5. Create and use a branch named `feat/<issue_number>` for the work.
-6. Use conventional commit messages such as `feat: short commit message`.
-7. For release version bumps, use `chore(release): vX.Y.Z` so release-note tooling can recognize and skip that commit cleanly.
+7. Create and use a branch named `feat/<issue_number>` for the work.
+8. Use conventional commit messages such as `feat: short commit message`.
+9. For release version bumps, use `chore(release): vX.Y.Z` so release-note tooling can recognize and skip that commit cleanly.
 
-This issue-first workflow is default unless the user explicitly says an issue already exists.
+This issue-first workflow is default unless the user explicitly says an issue already exists. If a current issue is already in progress in the same chat, assume follow-up requests belong to that issue unless told otherwise.
 
 ## Workflow for stage, push, review, merge
 
