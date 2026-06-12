@@ -19,8 +19,19 @@ from homeassistant.exceptions import (
 )
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
 
-from .api import OgeAccount, OgeAuthenticationError, OgeClient, OgeConnectionError
-from .const import CONF_ACCOUNT_NUMBER, CONF_CONTRACT_NUMBER, DOMAIN
+from .api import (
+    OgeAccount,
+    OgeAuthenticationError,
+    OgeClient,
+    OgeClientError,
+    OgeConnectionError,
+)
+from .const import (
+    CONF_ACCOUNT_NUMBER,
+    CONF_CONTRACT_NUMBER,
+    DOMAIN,
+    MAX_MANUAL_REFRESH_DAYS,
+)
 from .coordinator import OgeConfigEntry, OgeDataUpdateCoordinator
 
 _PLATFORMS: list[Platform] = [Platform.SENSOR]
@@ -32,7 +43,9 @@ ATTR_TO_DATE = "to_date"
 SERVICE_REFRESH_SCHEMA = vol.Schema(
     {
         vol.Optional(CONF_ACCOUNT_NUMBER): cv.string,
-        vol.Optional(ATTR_HISTORY_DAYS): vol.All(vol.Coerce(int), vol.Range(min=1)),
+        vol.Optional(ATTR_HISTORY_DAYS): vol.All(
+            vol.Coerce(int), vol.Range(min=1, max=MAX_MANUAL_REFRESH_DAYS)
+        ),
         vol.Optional(ATTR_FROM_DATE): cv.date,
         vol.Optional(ATTR_TO_DATE): cv.date,
     }
@@ -67,6 +80,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: OgeConfigEntry) -> bool:
         raise ConfigEntryAuthFailed from err
     except OgeConnectionError as err:
         raise ConfigEntryNotReady from err
+    except OgeClientError as err:
+        raise ConfigEntryNotReady("Unexpected response from OGE") from err
 
     account = next(
         (
@@ -102,6 +117,10 @@ def _async_register_services(hass: HomeAssistant) -> None:
         """Refresh one or all configured OGE entries."""
         target_account = call.data.get(CONF_ACCOUNT_NUMBER)
         from_date, to_date = _get_refresh_window(call.data)
+        if target_account is None and _has_window_override(call.data):
+            raise ServiceValidationError(
+                "account_number is required when overriding the refresh window"
+            )
         coordinators = list(
             _iter_coordinators(
                 hass.config_entries.async_entries(DOMAIN),
@@ -186,6 +205,10 @@ def _get_refresh_window(
     if from_date is not None and to_date is not None:
         if from_date > to_date:
             raise ServiceValidationError("from_date must be on or before to_date")
+        if (to_date - from_date).days + 1 > MAX_MANUAL_REFRESH_DAYS:
+            raise ServiceValidationError(
+                f"Refresh window cannot exceed {MAX_MANUAL_REFRESH_DAYS} days"
+            )
         _LOGGER.debug(
             "Resolved manual OGE refresh explicit window %s..%s",
             from_date,
@@ -194,3 +217,12 @@ def _get_refresh_window(
         return from_date, to_date
 
     return None, None
+
+
+def _has_window_override(data: dict) -> bool:
+    """Return whether the service call overrides the default refresh window."""
+    return (
+        data.get(ATTR_HISTORY_DAYS) is not None
+        or data.get(ATTR_FROM_DATE) is not None
+        or data.get(ATTR_TO_DATE) is not None
+    )

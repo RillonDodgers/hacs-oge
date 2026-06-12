@@ -36,9 +36,6 @@
       "estimated_bill": {
         "name": "Estimated bill"
       },
-      "price_per_kwh": {
-        "name": "Price per kWh"
-      },
       "service_address": {
         "name": "Service address"
       },

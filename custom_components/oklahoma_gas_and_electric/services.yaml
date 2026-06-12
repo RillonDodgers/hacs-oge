@@ -8,13 +8,13 @@ refresh:
       example: "1234567890"
     history_days:
       name: History days
-      description: Override the normal refresh window and import this many days ending today.
+      description: Override the normal refresh window for one account and import this many days ending today. Maximum 365 days.
       example: 365
     from_date:
       name: From date
-      description: Override the normal refresh window start date in YYYY-MM-DD format. Use together with to_date.
+      description: Override the normal refresh window start date for one account in YYYY-MM-DD format. Use together with to_date. Maximum span 365 days.
       example: "2025-06-01"
     to_date:
       name: To date
-      description: Override the normal refresh window end date in YYYY-MM-DD format. Use together with from_date.
+      description: Override the normal refresh window end date for one account in YYYY-MM-DD format. Use together with from_date. Maximum span 365 days.
       example: "2026-06-12"
