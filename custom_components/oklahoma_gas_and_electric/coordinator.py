@@ -25,9 +25,10 @@ from homeassistant.util import dt as dt_util
 from .const import (
     CONF_CORRECTION_DAYS,
     CONF_HISTORY_DAYS,
+    CONF_POLL_INTERVAL_HOURS,
     DEFAULT_CORRECTION_DAYS,
     DEFAULT_HISTORY_DAYS,
-    DEFAULT_SCAN_INTERVAL,
+    DEFAULT_POLL_INTERVAL_HOURS,
     DOMAIN,
 )
 from .statistics import OgeStatisticsManager
@@ -35,6 +36,14 @@ from .statistics import OgeStatisticsManager
 type OgeConfigEntry = ConfigEntry[OgeDataUpdateCoordinator]
 
 _LOGGER = logging.getLogger(__name__)
+
+
+def _get_update_interval(config_entry: ConfigEntry) -> timedelta:
+    """Return polling interval from config entry options."""
+    hours = config_entry.options.get(
+        CONF_POLL_INTERVAL_HOURS, DEFAULT_POLL_INTERVAL_HOURS
+    )
+    return timedelta(hours=hours)
 
 
 @dataclass(slots=True, frozen=True)
@@ -64,7 +73,7 @@ class OgeDataUpdateCoordinator(DataUpdateCoordinator[OgeData]):
             hass=hass,
             logger=_LOGGER,
             name=DOMAIN,
-            update_interval=DEFAULT_SCAN_INTERVAL,
+            update_interval=_get_update_interval(config_entry),
             config_entry=config_entry,
         )
         self.api = api
@@ -84,6 +93,7 @@ class OgeDataUpdateCoordinator(DataUpdateCoordinator[OgeData]):
         lookback_days = history_days if not has_imported_statistics else correction_days
         from_date = to_date - timedelta(days=lookback_days - 1)
         try:
+            await self.api.async_prepare_authenticated_session()
             snapshot: OgeAccountSnapshot = await self.api.async_get_account_snapshot(
                 self.account,
                 from_date,

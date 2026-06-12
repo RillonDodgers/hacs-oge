@@ -49,13 +49,14 @@
   },
   "options": {
     "step": {
-      "init": {
-        "title": "History settings",
-        "data": {
-          "history_days": "Initial history days",
-          "correction_days": "Correction window days"
+        "init": {
+          "title": "Update settings",
+          "data": {
+            "history_days": "Initial history days",
+            "correction_days": "Correction window days",
+            "poll_interval_hours": "Polling interval hours"
+          }
         }
       }
     }
   }
-}

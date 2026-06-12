@@ -182,6 +182,11 @@ class OgeClient:
             raise OgeClientError("No usable accounts returned by OGE")
         return parsed_accounts
 
+    async def async_prepare_authenticated_session(self) -> None:
+        """Start a fresh authenticated portal session."""
+        self._clear_session_cookie()
+        await self.async_login()
+
     async def async_get_account_snapshot(
         self,
         account: OgeAccount,

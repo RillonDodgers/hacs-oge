@@ -30,9 +30,13 @@ from .const import (
     CONF_CONTRACT_NUMBER,
     CONF_CORRECTION_DAYS,
     CONF_HISTORY_DAYS,
+    CONF_POLL_INTERVAL_HOURS,
     DEFAULT_CORRECTION_DAYS,
     DEFAULT_HISTORY_DAYS,
+    DEFAULT_POLL_INTERVAL_HOURS,
     DOMAIN,
+    MAX_POLL_INTERVAL_HOURS,
+    MIN_POLL_INTERVAL_HOURS,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -244,6 +248,18 @@ class OgeOptionsFlowHandler(OptionsFlowWithReload):
                             CONF_CORRECTION_DAYS, DEFAULT_CORRECTION_DAYS
                         ),
                     ): vol.All(vol.Coerce(int), vol.Range(min=1, max=90)),
+                    vol.Required(
+                        CONF_POLL_INTERVAL_HOURS,
+                        default=self.config_entry.options.get(
+                            CONF_POLL_INTERVAL_HOURS, DEFAULT_POLL_INTERVAL_HOURS
+                        ),
+                    ): vol.All(
+                        vol.Coerce(int),
+                        vol.Range(
+                            min=MIN_POLL_INTERVAL_HOURS,
+                            max=MAX_POLL_INTERVAL_HOURS,
+                        ),
+                    ),
                 }
             ),
         )
