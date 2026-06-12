@@ -16,6 +16,6 @@
   "issue_tracker": "https://github.com/RillonDodgers/hacs-oge/issues",
   "requirements": [],
   "ssdp": [],
-  "version": "0.2.0b2",
+  "version": "0.2.0",
   "zeroconf": []
 }
