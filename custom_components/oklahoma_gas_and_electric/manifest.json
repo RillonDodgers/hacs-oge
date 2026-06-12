@@ -1,13 +1,11 @@
 {
   "domain": "oklahoma_gas_and_electric",
   "name": "Oklahoma Gas & Electric",
-  "version": "0.2.0b1",
-  "issue_tracker": "https://github.com/RillonDodgers/hacs-oge/issues",
-  "codeowners": [
-    "@RillonDodgers"
-  ],
   "after_dependencies": [
     "recorder"
+  ],
+  "codeowners": [
+    "@RillonDodgers"
   ],
   "config_flow": true,
   "dependencies": [],
@@ -15,7 +13,9 @@
   "homekit": {},
   "integration_type": "service",
   "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/RillonDodgers/hacs-oge/issues",
   "requirements": [],
   "ssdp": [],
+  "version": "0.2.0b2",
   "zeroconf": []
 }
