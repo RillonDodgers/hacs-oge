@@ -7,7 +7,7 @@
 ![Electricity usage example](images/example-001.png)
 
 > [!WARNING]
-> This is a personal project I built for myself, and I may or may not maintain it going forward. You are welcome to fork it and make your own changes, and you can submit PRs if needed, but I may decide not to maintain it for others.
+> Development of this project made heavy use of AI tooling. I have been a software engineer for 10 years and have been a Senior Software Engineer for about 3 to 4 years, but this is still a personal project I built for my own Home Assistant instance because I wanted my OGE data in Home Assistant. I am sharing it in case others want their data too, but you assume all risks if you choose to use it.
 
 Custom Home Assistant integration for Oklahoma Gas & Electric (OGE).
 
@@ -58,4 +58,5 @@ After setup, the integration supports options for:
 
 - This integration currently targets electric usage data available from the OGE portal.
 - Energy Dashboard should use the imported OGE statistics, not a daily-reset sensor.
+- This repository is licensed under the MIT License. See [LICENSE](LICENSE).
 - Release and changelog workflow details live in [RELEASING.md](RELEASING.md).
