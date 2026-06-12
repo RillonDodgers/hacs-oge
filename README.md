@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="brand/icon.png" alt="Oklahoma Gas & Electric" width="160">
+  <img src="custom_components/oklahoma_gas_and_electric/brand/icon.png" alt="Oklahoma Gas & Electric" width="160">
 </p>
 
 # Oklahoma Gas & Electric for Home Assistant
