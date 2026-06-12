@@ -179,6 +179,7 @@ For each new problem or change request in this repository:
    - `Confirmation`: concrete acceptance criteria
 5. Create and use a branch named `feat/<issue_number>` for the work.
 6. Use conventional commit messages such as `feat: short commit message`.
+7. For release version bumps, use `chore(release): vX.Y.Z` so release-note tooling can recognize and skip that commit cleanly.
 
 This issue-first workflow is default unless the user explicitly says an issue already exists.
 
