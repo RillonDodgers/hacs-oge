@@ -9,6 +9,7 @@ import logging
 from typing import Any
 
 from homeassistant.components.recorder import get_instance
+from homeassistant.components.recorder.db_schema import Statistics, StatisticsShortTerm
 from homeassistant.components.recorder.models import (
     StatisticData,
     StatisticMeanType,
@@ -16,9 +17,11 @@ from homeassistant.components.recorder.models import (
 )
 from homeassistant.components.recorder.statistics import (
     async_add_external_statistics,
+    get_metadata,
     get_last_statistics,
     statistics_during_period,
 )
+from homeassistant.components.recorder.util import session_scope
 from homeassistant.const import CURRENCY_DOLLAR, UnitOfEnergy
 from homeassistant.core import HomeAssistant
 from homeassistant.util import dt as dt_util
@@ -56,6 +59,8 @@ class OgeStatisticsManager:
         imported_hours = tuple(_build_imported_hours(self.hass, usage_days))
         if not imported_hours:
             return
+
+        await self._async_delete_stale_future_rows(imported_hours[-1].start)
 
         energy_base_sum = await self._async_get_sum_before(
             self.energy_statistic_id, imported_hours[0].start
@@ -95,6 +100,27 @@ class OgeStatisticsManager:
             "Imported %s OGE hourly rows for %s",
             len(imported_hours),
             self.account.account_number,
+        )
+
+    async def _async_delete_stale_future_rows(self, latest_start: datetime) -> None:
+        """Delete stale rows later than the latest imported hour on that day."""
+        deleted_counts = await get_instance(self.hass).async_add_executor_job(
+            _delete_statistics_after_start_in_day,
+            self.hass,
+            (self.energy_statistic_id, self.cost_statistic_id),
+            latest_start,
+        )
+        deleted_total = sum(deleted_counts.values())
+        if not deleted_total:
+            return
+
+        _LOGGER.debug(
+            "Deleted %s stale OGE statistic row%s after %s for %s: %s",
+            deleted_total,
+            "" if deleted_total == 1 else "s",
+            latest_start.isoformat(),
+            self.account.account_number,
+            deleted_counts,
         )
 
     async def async_has_statistics(self) -> bool:
@@ -224,3 +250,43 @@ def _display_account_name(account_number: str) -> str:
     digits = "".join(char for char in account_number if char.isdigit())
     suffix = digits[-4:] if len(digits) >= 4 else account_number[-4:]
     return f"OGE XXXX{suffix}"
+
+
+def _delete_statistics_after_start_in_day(
+    hass: HomeAssistant,
+    statistic_ids: tuple[str, ...],
+    latest_start: datetime,
+) -> dict[str, int]:
+    """Delete statistic rows after latest_start until end of that local day."""
+    metadata = get_metadata(hass, statistic_ids=set(statistic_ids))
+    if not metadata:
+        return {}
+
+    recorder = get_instance(hass)
+    day_end = latest_start + timedelta(days=1)
+    day_end = day_end.replace(hour=0, minute=0, second=0, microsecond=0)
+    latest_start_ts = latest_start.timestamp()
+    day_end_ts = day_end.timestamp()
+    deleted_counts: dict[str, int] = {}
+
+    with session_scope(session=recorder.get_session()) as session:
+        for statistic_id in statistic_ids:
+            statistic_metadata = metadata.get(statistic_id)
+            if statistic_metadata is None:
+                continue
+
+            metadata_id = statistic_metadata[0]
+            deleted = session.query(Statistics).filter(
+                Statistics.metadata_id == metadata_id,
+                Statistics.start_ts > latest_start_ts,
+                Statistics.start_ts < day_end_ts,
+            ).delete(synchronize_session=False)
+            deleted += session.query(StatisticsShortTerm).filter(
+                StatisticsShortTerm.metadata_id == metadata_id,
+                StatisticsShortTerm.start_ts > latest_start_ts,
+                StatisticsShortTerm.start_ts < day_end_ts,
+            ).delete(synchronize_session=False)
+            if deleted:
+                deleted_counts[statistic_id] = deleted
+
+    return deleted_counts
