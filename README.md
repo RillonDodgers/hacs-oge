@@ -54,6 +54,57 @@ After setup, the integration supports options for:
 - initial history backfill window
 - correction window for re-importing recently changed utility data
 
+## Manual refresh
+
+You can trigger an immediate refresh from Home Assistant using the `oklahoma_gas_and_electric.refresh` action.
+
+In the UI:
+
+1. Open `Developer Tools -> Actions`.
+2. Choose `oklahoma_gas_and_electric.refresh`.
+3. Provide action data if you want to target a specific account or override the normal refresh window.
+
+Example: refresh all configured OGE entries using their normal scheduled refresh window
+
+```yaml
+action: oklahoma_gas_and_electric.refresh
+```
+
+Example: refresh today for one account
+
+```yaml
+action: oklahoma_gas_and_electric.refresh
+data:
+  account_number: "1234567890"
+  history_days: 1
+```
+
+Example: refresh the last 14 days for one account
+
+```yaml
+action: oklahoma_gas_and_electric.refresh
+data:
+  account_number: "1234567890"
+  history_days: 14
+```
+
+Example: refresh an explicit date range
+
+```yaml
+action: oklahoma_gas_and_electric.refresh
+data:
+  account_number: "1234567890"
+  from_date: "2026-06-01"
+  to_date: "2026-06-13"
+```
+
+Notes:
+
+- If you omit `account_number`, the action refreshes all configured OGE entries using their normal scheduled refresh window.
+- You can omit `account_number` only when you are not overriding the refresh window.
+- If you use `history_days` or `from_date` / `to_date`, you must provide `account_number`.
+- The maximum manual refresh window is 365 days.
+
 ## Notes
 
 - This integration currently targets electric usage data available from the OGE portal.
