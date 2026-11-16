@@ -5,12 +5,11 @@ from dataclasses import dataclass
 from decimal import Decimal
 
 from homeassistant.components.sensor import (
-    EntityCategory,
     SensorDeviceClass,
     SensorEntity,
     SensorEntityDescription,
 )
-from homeassistant.const import UnitOfPower
+from homeassistant.const import EntityCategory, UnitOfPower
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
